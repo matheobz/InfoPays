@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue.js Geography App</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        #app {
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input {
+            padding: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        p {
+            margin: 5px 0;
+        }
+
+        #api-info {
+            margin-top: 20px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <h1>Informations Géographiques</h1>
+
+    <input type="text" v-model="searchQuery" @input="searchCountry" @keyup.enter="fetchCountryInfo" placeholder="Rechercher un pays">
+
+    <div v-if="countryInfo">
+        <h2>{{ countryInfo.name.common }}</h2>
+        <p>Capital: {{ formatCapital(countryInfo.capital) }}</p>
+        <p>Population: {{ countryInfo.population }}</p>
+        <p>Region: {{ countryInfo.region }}</p>
+    </div>
+
+    <div id="api-info">
+        <p>Ces informations sont fournies par l'API Rest Countries.</p>
+        <p>L'API Rest Countries fournit des données géographiques sur les pays du monde.</p>
+        <p>Consultez <a href="https://restcountries.com/" target="_blank">Rest Countries</a> pour plus d'informations.</p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            searchQuery: '',
+            countryInfo: null
+        },
+        methods: {
+            fetchCountryInfo() {
+                fetch(`https://restcountries.com/v3.1/name/${this.searchQuery}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            this.countryInfo = data[0];
+                        } else {
+                            console.error('Pays non trouvé');
+                        }
+                    })
+                    .catch(error => console.error('Erreur lors de la recherche du pays:', error));
+            },
+            searchCountry() {
+                this.countryInfo = null;
+            },
+            formatCapital(capital) {
+                // Vérifie si la propriété capital est un tableau
+                if (Array.isArray(capital)) {
+                    return capital.join(', '); // Si c'est le cas, join les éléments du tableau
+                }
+                return capital; // Sinon, retourne la valeur telle quelle
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
